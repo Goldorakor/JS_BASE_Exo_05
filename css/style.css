@@ -1,0 +1,67 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+}
+
+
+#quotes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: auto;  
+}
+
+
+/* c'est bien la classe qui définit nos rectangles de citation */
+/* quoteDiv.className = 'quote'; dans le fichier main.js */
+.quote { 
+    margin: auto;
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+
+.texte {
+    color: rgb(52, 83, 83);
+    font-style: italic;
+}
+
+
+.auteur {
+    display: flex;
+    justify-content: right;
+    font-size: 0.7em;
+    color: #555;
+    margin-top: 10px;
+    font-style: normal;
+}
+
+
+.coeur {
+    background : rgb(255, 255, 255);
+    color :rgb(163, 91, 147);
+    display: none;
+    justify-content: center;  /* on centre le coeur */
+    align-items: center;  /* on centre le coeur */
+    width : 20px;
+    height: 20px;
+    top :0;
+    left :0;
+    position : absolute;
+}
+
+
