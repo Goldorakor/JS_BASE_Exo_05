@@ -111,11 +111,10 @@ citations.forEach(citation => {
     const heart = citation.querySelector('.coeur'); // Sélectionne le cœur associé car quote.querySelector et pas bidule.querySelector
 
 
-
     // on a besoin de ces deux variables pour injecter dans le localStorage si favori
+    // il faudra faire gaffe, les 2 variables ne sont pas du texte brut !! 
     const texte = citation.querySelector('.texte'); // ('.texte') car je veux sélectionner l'élément de la classe texte
     const auteur = citation.querySelector('.auteur'); // pareil pour la classe auteur
-
 
 
     citation.addEventListener('mouseover', function() {
@@ -134,14 +133,6 @@ citations.forEach(citation => {
         
     });
 
-/*
-
-    citation.addEventListener('mouseout', function() {
-        if (this.heart.classList.contains = 'aria-hidden') {this.heart.style.display = 'flex'} else {heart.style.display = 'none'}
-        ; // Masque le cœur lorsque le curseur quitte le rectangle
-    });
-
-*/
 
     citation.addEventListener('click', function() {
         // Affiche le nouveau coeur plein après le clique
@@ -150,24 +141,80 @@ citations.forEach(citation => {
         heart.innerHTML = `
         <i class="fa fa-heart" aria-hidden="true"></i>
         `;
-        
-
         // stocker dans le localStorage
         const quoteData = {
-            author : auteur,
-            text : texte,
+            author : auteur.textContent,
+            text : texte.textContent,
         };
 
 
-        // 'selectedQuote' est la clé de stockage
-        localStorage.setItem('selectedQuote', quoteData);
+        /*
+        exemples pour illustrer l'importance de texteContent
+
+
+        <p id="monParagraphe">Bonjour, monde !</p>
+
+        <script>
+            const paragraphe = document.getElementById('monParagraphe');
+            const texte = paragraphe.textContent;
+            console.log(texte); // Affiche "Bonjour, monde !"
+        </script>
+
+
+
+
+        <p id="monParagraphe">Bonjour, monde !</p>
+
+        <script>
+            const paragraphe = document.getElementById('monParagraphe');
+            paragraphe.textContent = "Nouveau texte ici.";
+            // Le texte du paragraphe devient "Nouveau texte ici."
+        </script>
+
+
+
+
+        <div id="monDiv">
+            <p>Texte 1</p>
+            <p>Texte 2</p>
+        </div>
+
+        <script>
+            const div = document.getElementById('monDiv');
+            console.log(div.textContent); // Affiche "Texte 1Texte 2"
+        </script>
+
+
+        .innerHTML : Utilisé pour récupérer ou définir le contenu HTML d'un élément. Utiliser .innerHTML peut exposer ton site à des risques de sécurité si tu manipules des données non sécurisées (par exemple, injection de code).
+
+
+        .innerText : Semblable à .textContent, mais il renvoie uniquement le texte visible (par exemple, il ignore le texte caché par des styles CSS).
+
+        */
+
+
+        // 'quoteDataStorage' est la "clé de stockage" dans le localStorage
+        localStorage.setItem('quoteDataStorage', JSON.stringify(quoteData));
         console.log (localStorage);
+
+        
+        const quoteDatarecup = JSON.parse(localStorage.getItem('quoteDataStorage'));
+        console.log (quoteDatarecup.text);
+        
+
+
+
+        /*
+        
+        Récupération
+        const citationRecuperee = JSON.parse(localStorage.getItem('quoteDataStorage'));
+        console.log(utilisateurRecupere.author); // 'auteur'
+        console.log(utilisateurRecupere.text); // 'texte'
+
+        */
 
 
     });
 
 
 });
-
-
-
