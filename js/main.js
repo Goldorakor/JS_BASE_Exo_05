@@ -1,52 +1,104 @@
 const quotesContainer = document.getElementById('quotes-container');
 
 
+// Récupérer les citations favorites depuis le localStorage
+// le tableau vide est une valeur de secours pour éviter que JSON.parse() avec un localStorage.getItem('quoteDataStorage') null ne renvoie une erreur.
+// en gros, si rien n'est trouvé dans le localStorage, favorites sera initialisé comme un tableau vide [].
+const favorites = (JSON.parse(localStorage.getItem('quoteDataStorage')) OR []);
+
+
 // boucle qui parcourt chaque entrée de l'objet quotes (notre "tableau associatif" associant auteurs et citations) où chaque entrée de cet objet est un tableau contenant un auteur et une citation [author, text].
+// cette boucle sert donc à afficher les citations et plus bas dans le code à vérifier si elles sont favorites
 for (const [auteur, texte] of Object.entries(quotes)) {
 
-    // pour chaque citation, un nouvel élément 'div' est créé, un coeur est également créé
+    // pour chaque citation, un nouvel élément 'quoteDiv' est créé, un élément 'heart' est également créé
     const quoteDiv = document.createElement('div');
     const heart = document.createElement('div');
 
-    // La classe quote est ajoutée à ce div, (voir possibilités de className) ce qui permet de le styliser facilement via CSS (dans style.css).
+    // La classe 'quote' est ajoutée à cet élément 'quoteDiv' qui n'avait pas de classe, (voir possibilités de className) ce qui permet de le styliser facilement via CSS (dans style.css) ou de le manipuler ici.
     quoteDiv.className = 'quote';
 
-    // la classe de mon div s'appelle coeur
+    // La classe 'coeur' est ajoutée à cet élément 'heart' qui n'avait pas de classe, (voir possibilités de className) ce qui permet de le styliser facilement via CSS (dans style.css) ou de le manipuler ici.
     heart.className = 'coeur'; 
 
     // La propriété style.width est définie pour que la largeur du div s'adapte au contenu qu'il contient.
     quoteDiv.style.width = 'fit-content';
 
     // Le contenu de quoteDiv est défini en utilisant des backticks (``) pour permettre l'insertion de variables. 
-    // Il inclut la citation et l'auteur avec le style de chaque classe spécifiée.
+    // Il inclut la citation et l'auteur en spécifiant la classe de chaque élément qui reçoit sa variable.
     quoteDiv.innerHTML = `
         <p class="texte">"${texte}"</p> 
         <p class="auteur">${auteur}</p>
     `;
 
-
-    // innerHTML : Cela te permet de définir le contenu HTML du heart. Tu peux inclure des éléments HTML comme des paragraphes et des icônes.
+    // innerHTML : Cela permet de définir le contenu HTML du div 'heart'. Tu peux inclure des éléments HTML comme des paragraphes et des icônes. Ici, on vient y loger une icone.
     heart.innerHTML = `
         <i class="fa-regular fa-heart"></i>
     `;
 
-    
-
-    // La ligne quotesContainer.appendChild(heart); signifie qu'on ajoute l'élément heart (qui est un <div>) en tant qu'enfant de l'élément quotesContainer.
+    // La ligne quotesContainer.appendChild(heart); signifie que l'élément heart (qui est un <div>) est un enfant de l'élément quotesContainer (qui est un <div> aussi).
     quoteDiv.appendChild(heart);
 
-    // Enfin, chaque quoteDiv est ajouté à un conteneur existant dans le document (représenté par quotesContainer).
+    // De même, on précise ici que l'élément quoteDiv est un enfant de l'élément quotesContainer (c'est ici plus évident vu la structure html).
     quotesContainer.appendChild(quoteDiv);
 
+    // Vérifier si la citation est dans les favoris
+    // favorites : Il s'agit d'un tableau d'objets qui contient toutes les citations favorites de l'utilisateur. Chaque objet a deux propriétés : text (le texte de la citation) et author (l'auteur de la citation).
+    // .some() : C'est une méthode de tableau en JavaScript qui teste si au moins un élément du tableau satisfait la condition fournie. Elle renvoie true si c'est le cas, et false sinon.
+    // fav => fav.text === texte && fav.author === auteur : Il s'agit d'une fonction fléchée qui définit la condition à vérifier pour chaque élément du tableau favorites.
+    // fav représente un objet dans le tableau favorites.
+    // fav.text === texte vérifie si le texte de la citation fav est égal à la citation actuellement traitée (texte).
+    // idem author
+    // Syntaxe des fonctions fléchées : array.some(element => condition) 
+    // element : C'est la variable qui représente chaque élément du tableau au cours de l'itération.
+    // condition : C'est l'expression qui renvoie true ou false. Si true, cela signifie que l'élément satisfait la condition.
+    
+    if (favorites.some(fav => ((fav.text === texte) && (fav.author === auteur)))) {
+        heart.classList.add('clicked');
+        heart.style.display = 'flex';
+        heart.innerHTML = `<i class="fa fa-heart" aria-hidden="true"></i>`;
     
 }
 
+// Gestion des événements pour le cœur
+    quoteDiv.addEventListener('mouseover', function() {
+        if (!heart.classList.contains('clicked')) { // si coeur pas cliqué
+            heart.style.display = 'flex'; // Affiche le cœur du rectangle survolé
+        }
+    });
 
-// Object.entries(quotes) est une méthode très utile en JavaScript qui te permet de récupérer les paires clé-valeur d'un objet sous forme de tableau. ((quotes est un objet))
+    quoteDiv.addEventListener('mouseout', function() {
+        if (!heart.classList.contains('clicked')) { // si coeur pas cliqué
+            heart.style.display = 'none'; // Masque le cœur lorsque le curseur quitte le rectangle
+        }
+    });
+
+    quoteDiv.addEventListener('click', function() {
+        heart.classList.add('clicked'); // Ajoute la classe 'clicked' sans écraser les autres classes
+        heart.style.display = 'flex'; // Le coeur n'est plus caché
+        
+        // Affiche le nouveau coeur plein après le clique
+        heart.innerHTML = `<i class="fa fa-heart" aria-hidden="true"></i>`;
+
+        const quoteData = { author: auteur, text: texte };
+
+        // Récupérer les citations existantes
+        let favorites = JSON.parse(localStorage.getItem('quoteDataStorage')) || [];
+        
+        // Ajouter la nouvelle citation si elle n'est pas déjà dans le tableau
+        if (!favorites.some(favo => favo.text === quoteData.text && favo.author === quoteData.author)) {
+            favorites.push(quoteData);
+            localStorage.setItem('quoteDataStorage', JSON.stringify(favorites));
+        }
+    });
+}
 
 
-/* exemple pour bien comprendre :
+/*
 
+Object.entries(quotes) est une méthode très utile en JavaScript qui te permet de récupérer les paires clé-valeur d'un objet sous forme de tableau. ((quotes est un objet))
+
+exemple pour bien comprendre :
 
 const quotes = {
     "Albert Einstein": "La vie est comme une bicyclette, il faut avancer pour ne pas perdre l'équilibre.",
@@ -54,10 +106,7 @@ const quotes = {
     "Confucius": "Il ne suffit pas d'ouvrir les yeux, il faut aussi voir."
 };
 
-
 Lorsque tu appelles Object.entries(quotes), cela retourne :
-
-
 [
     ["Albert Einstein", "La vie est comme une bicyclette, il faut avancer pour ne pas perdre l'équilibre."],
     ["Marie Curie", "Rien dans la vie n'est à craindre, tout est à comprendre."],
@@ -66,91 +115,14 @@ Lorsque tu appelles Object.entries(quotes), cela retourne :
 
 Chaque sous-tableau contient deux éléments : le premier est le nom de l'auteur (la clé) et le deuxième est la citation (la valeur).
 
-
-
-Facilité de itération : Tu peux facilement parcourir les paires clé-valeur à l'aide d'une boucle for...of, comme dans ton exemple précédent :
+Facilité de itération : on peut facilement parcourir les paires clé-valeur à l'aide d'une boucle for...of, comme dans l'exemple précédent :
 
 for (const [author, text] of Object.entries(quotes)) {
     console.log(`${author}: "${text}"`);
 }
 
 
-*/
-
-
-
-
-/*
-ce code ne fonctionne que pour le premier coeur
-
-
-const quoteDiv = document.querySelector('.quote');
-const heart = document.querySelector('.coeur');
-
-
-// quand le souris passe sur la zone quoteDiv (quoteDiv.addEventListener)
-quoteDiv.addEventListener('mouseover', function() {
-    heart.style.display = 'flex'; // Affiche le cœur
-});
-
-// quand le souris quitte la zone quoteDiv (quoteDiv.addEventListener)
-quoteDiv.addEventListener('mouseout', function() {
-    heart.style.display = 'none'; // Masque le cœur
-});
-
-*/
-
-
-// Sélectionne tous les éléments avec la classe 'quote'
-// attention de bien changer le nom de la variable, si on reprend quotes, ça ne fonctionnera pas !
-
-const citations = document.querySelectorAll('.quote');
-
-
-citations.forEach(citation => {
-    const heart = citation.querySelector('.coeur'); // Sélectionne le cœur associé car quote.querySelector et pas bidule.querySelector
-
-
-    // on a besoin de ces deux variables pour injecter dans le localStorage si favori
-    // il faudra faire gaffe, les 2 variables ne sont pas du texte brut !! 
-    const texte = citation.querySelector('.texte'); // ('.texte') car je veux sélectionner l'élément de la classe texte
-    const auteur = citation.querySelector('.auteur'); // pareil pour la classe auteur
-
-
-    citation.addEventListener('mouseover', function() {
-        if (!heart.classList.contains('clicked')) {
-            // Affiche le cœur du rectangle survolé
-        heart.style.display = 'flex';
-        }
-        
-
-    });
-
-    citation.addEventListener('mouseout', function() {
-        if (!heart.classList.contains('clicked')) {
-            heart.style.display = 'none'; // Masque le cœur lorsque le curseur quitte le rectangle
-        }
-        
-    });
-
-
-    citation.addEventListener('click', function() {
-        // Affiche le nouveau coeur plein après le clique
-        heart.classList.add('clicked'); // Ajoute la classe 'clicked'
-        heart.style.display = 'flex';
-        heart.innerHTML = `
-        <i class="fa fa-heart" aria-hidden="true"></i>
-        `;
-        // stocker dans le localStorage
-        const quoteData = {
-            author : auteur.textContent,
-            text : texte.textContent,
-        };
-
-
-        /*
         exemples pour illustrer l'importance de texteContent
-
 
         <p id="monParagraphe">Bonjour, monde !</p>
 
@@ -160,9 +132,6 @@ citations.forEach(citation => {
             console.log(texte); // Affiche "Bonjour, monde !"
         </script>
 
-
-
-
         <p id="monParagraphe">Bonjour, monde !</p>
 
         <script>
@@ -170,8 +139,6 @@ citations.forEach(citation => {
             paragraphe.textContent = "Nouveau texte ici.";
             // Le texte du paragraphe devient "Nouveau texte ici."
         </script>
-
-
 
 
         <div id="monDiv">
@@ -191,30 +158,3 @@ citations.forEach(citation => {
         .innerText : Semblable à .textContent, mais il renvoie uniquement le texte visible (par exemple, il ignore le texte caché par des styles CSS).
 
         */
-
-
-        // 'quoteDataStorage' est la "clé de stockage" dans le localStorage
-        localStorage.setItem('quoteDataStorage', JSON.stringify(quoteData));
-        console.log (localStorage);
-
-        
-        const quoteDatarecup = JSON.parse(localStorage.getItem('quoteDataStorage'));
-        console.log (quoteDatarecup.text);
-        
-
-
-
-        /*
-        
-        Récupération
-        const citationRecuperee = JSON.parse(localStorage.getItem('quoteDataStorage'));
-        console.log(utilisateurRecupere.author); // 'auteur'
-        console.log(utilisateurRecupere.text); // 'texte'
-
-        */
-
-
-    });
-
-
-});
